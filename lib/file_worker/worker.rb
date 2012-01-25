@@ -1,6 +1,6 @@
 module FileWorker
   class Worker
-    def initialize(file_name)
+    def initialize(file_name, options)
       @file_name = file_name
     end
 

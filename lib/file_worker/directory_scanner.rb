@@ -1,27 +1,38 @@
 require 'girl_friday'
+require 'fileutils'
+require 'jruby/synchronized'
 
 module FileWorker
   class DirectoryScanner
-    attr_accessor :in_path, :processing, :done_path, :worker_class
+    attr_accessor :worker_class
 
     def initialize(options)
-      @options = options
-      @in_path         = @options[:root] + 'in'
-      @processing_path = @options[:root] + 'processing'
-      @done_path       = @options[:root] + 'done'
-      @sleep           = 1
+      @options   = options
+      @in_path   = @options[:root] + 'in'
+      @done_path = @options[:root] + 'done'
+      @sleep     = @options[:sleep] || 1
 
       @worker_class = Worker
+
+      @state = {}
+      @state.extend JRuby::Synchronized
     end
 
     def queue
       @queue ||= GirlFriday::WorkQueue.new(:file_worker, :size => 3) do |file_name|
-        @worker_class.new(file_name).process
+        @state[file_name] = {:time => Time.now, :status => :working}
+
+        @worker_class.new(file_name, @options).process
+
+        FileUtils.mv(file_name, @done_path)
+
+        @state.delete(file_name)
       end
     end
 
     def enqueue(file_name)
-      puts "enqueueing #{file_name}"
+      @state[file_name] = {:time => Time.now, :status => :enqueued}
+
       queue.push(file_name)
     end
 
@@ -30,7 +41,7 @@ module FileWorker
     end
 
     def scan
-      file_names = Dir.glob(@in_path + '*')
+      file_names = Dir.glob(@in_path + '*') - @state.keys
       file_names.each do |file_name|
         enqueue(file_name)
       end
@@ -47,5 +58,6 @@ module FileWorker
     def stop
       @run = false
     end
+
   end
 end

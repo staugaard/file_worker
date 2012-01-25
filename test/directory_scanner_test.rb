@@ -1,7 +1,7 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 
 class TestWorker
-  def initialize(file_name)
+  def initialize(file_name, options)
     @file_name = file_name
   end
 
@@ -20,13 +20,13 @@ describe "the directory scanner" do
   end
 
   it "should enqueue the files in the in directory" do
-    @file_worker.expects(:enqueue).times(5)
+    @file_worker.queue.expects(:push).times(5)
     @file_worker.scan
     @file_worker.wait_for_empty
   end
 
   it "should not enqueue the this same files twice" do
-    @file_worker.expects(:enqueue).times(5)
+    @file_worker.queue.expects(:push).times(5)
     @file_worker.scan
     @file_worker.wait_for_empty
     @file_worker.scan
