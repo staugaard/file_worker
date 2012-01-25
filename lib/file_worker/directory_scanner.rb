@@ -12,14 +12,17 @@ module FileWorker
       @done_path = @options[:root] + 'done'
       @sleep     = @options[:sleep] || 1
 
+      @max_queue_size = @options[:max_queue_size] || 1000
+
       @worker_class = Worker
 
       @state = {}
       @state.extend JRuby::Synchronized
+      @queue_name = "file_worker"
     end
 
     def queue
-      @queue ||= GirlFriday::WorkQueue.new(:file_worker, :size => 3) do |file_name|
+      @queue ||= GirlFriday::WorkQueue.new(@queue_name, :size => 3) do |file_name|
         @state[file_name] = {:time => Time.now, :status => :working}
 
         @worker_class.new(file_name, @options).process
@@ -28,6 +31,10 @@ module FileWorker
 
         @state.delete(file_name)
       end
+    end
+
+    def queue_size
+      queue.status[@queue_name][:backlog]
     end
 
     def enqueue(file_name)
@@ -42,7 +49,10 @@ module FileWorker
 
     def scan
       file_names = Dir.glob(@in_path + '*') - @state.keys
-      file_names.each do |file_name|
+
+      max_items = @max_queue_size - queue_size
+
+      file_names[0,max_items].each do |file_name|
         enqueue(file_name)
       end
     end
