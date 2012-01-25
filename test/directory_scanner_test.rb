@@ -10,7 +10,7 @@ class TestWorker
   end
 end
 
-describe "the file uploader" do
+describe "the directory scanner" do
   before do
     prepare_fixture_files
     @file_worker = FileWorker::DirectoryScanner.new(
