@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "fakefs"
 
   s.add_runtime_dependency "girl_friday"
+  s.add_runtime_dependency "fog"
 end
