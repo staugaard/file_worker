@@ -14,6 +14,7 @@ module FileWorker
       @done_path = Pathname.new(@options[:out_directory])
       @glob_path = @in_path + '**/*'
       @sleep     = @options[:sleep] || 1
+      @workers   = @options[:workers] || 5
 
       @max_queue_size = @options[:max_queue_size] || 1000
 
@@ -44,7 +45,7 @@ module FileWorker
     end
 
     def queue
-      @queue ||= GirlFriday::WorkQueue.new(@queue_name, :size => 3) do |file_name|
+      @queue ||= GirlFriday::WorkQueue.new(@queue_name, :size => @workers) do |file_name|
         process(file_name)
       end
     end
@@ -81,6 +82,15 @@ module FileWorker
     end
 
     def start
+      puts "File Worker Starting"
+      puts "  in directory    #{@in_path}"
+      puts "  out directory   #{@done_path}"
+      puts "  workers         #{@workers}"
+      puts "  max queue size  #{@max_queue_size}"
+      puts "  scan interval   #{@sleep}s"
+      puts "  worker          #{@worker_class.name}"
+      puts ""
+
       @run = true
       while @run
         scan

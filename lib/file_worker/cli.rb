@@ -40,8 +40,6 @@ module FileWorker
 
       options[:out_directory] ||= File.expand_path('../done', options[:in_directory])
 
-      puts options.inspect
-
       DirectoryScanner.new(options)
     end
   end
