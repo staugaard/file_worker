@@ -26,9 +26,12 @@ module FileWorker
       @queue ||= GirlFriday::WorkQueue.new(@queue_name, :size => 3) do |file_name|
         @state[file_name] = {:time => Time.now, :status => :working}
 
-        @worker_class.new(file_name, @options).process
-
-        FileUtils.mv(file_name, @done_path)
+        begin
+          @worker_class.new(file_name, @options).process
+          FileUtils.mv(file_name, @done_path)
+        rescue Exception => e
+          handle_error(file_name, e)
+        end
 
         @state.delete(file_name)
       end
@@ -76,5 +79,12 @@ module FileWorker
       @run = false
     end
 
+    def on_error(&block)
+      @error_handler = block
+    end
+
+    def handle_error(file_name, exception)
+      @error_handler.call(file_name, exception) if @error_handler
+    end
   end
 end

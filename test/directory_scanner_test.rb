@@ -1,4 +1,5 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
+require 'jruby/synchronized'
 
 class TestWorker
   def initialize(file_name, options)
@@ -10,6 +11,16 @@ class TestWorker
   end
 end
 
+class FailingTestWorker
+  def initialize(file_name, options)
+    @file_name = file_name
+  end
+
+  def process
+    raise @file_name
+  end
+end
+
 describe "the directory scanner" do
   before do
     prepare_fixture_files
@@ -18,6 +29,13 @@ describe "the directory scanner" do
       :max_queue_size => 10
     )
     @file_worker.worker_class = TestWorker
+
+    @errors = []
+    @errors.extend JRuby::Synchronized
+
+    @file_worker.on_error do |file_name, exception|
+      @errors << file_name
+    end
   end
 
   it "should enqueue the files in the in directory" do
@@ -91,6 +109,27 @@ describe "the directory scanner" do
       @file_worker.queue.expects(:push).times(4)
       @file_worker.scan
       @file_worker.wait_for_empty
+    end
+  end
+
+  describe "when jobs fail" do
+    before do
+      @file_worker.worker_class = FailingTestWorker
+      @file_worker.scan
+      @file_worker.wait_for_empty
+    end
+
+    it "should call the error handler" do
+      @errors.size.must_equal(5)
+    end
+
+    it "should not move the files" do
+      @file_worker.done_path.children.must_be_empty
+      @file_worker.in_path.children.size.must_equal(5)
+    end
+
+    it "should remove the files from state" do
+      @file_worker.state.must_be_empty
     end
   end
 
