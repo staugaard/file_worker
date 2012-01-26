@@ -33,12 +33,12 @@ module FileWorker
       end.parse!
 
       if root = ARGV[0]
-        options[:in_dir] = File.expand_path(root, Dir.pwd)
+        options[:in_directory] = File.expand_path(root, Dir.pwd)
       else
-        options[:in_dir] = Dir.pwd
+        options[:in_directory] = Dir.pwd
       end
 
-      options[:out_directory] ||= File.expand_path('../done', options[:in_dir])
+      options[:out_directory] ||= File.expand_path('../done', options[:in_directory])
 
       puts options.inspect
 

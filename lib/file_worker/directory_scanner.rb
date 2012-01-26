@@ -1,6 +1,7 @@
 require 'girl_friday'
 require 'fileutils'
 require 'jruby/synchronized'
+require 'pathname'
 
 module FileWorker
   class DirectoryScanner
@@ -9,8 +10,8 @@ module FileWorker
 
     def initialize(options)
       @options   = options
-      @in_path   = @options[:in_directory]
-      @done_path = @options[:out_directory]
+      @in_path   = Pathname.new(@options[:in_directory])
+      @done_path = Pathname.new(@options[:out_directory])
       @sleep     = @options[:sleep] || 1
 
       @max_queue_size = @options[:max_queue_size] || 1000
