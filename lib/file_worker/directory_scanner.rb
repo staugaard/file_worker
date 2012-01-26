@@ -22,18 +22,23 @@ module FileWorker
       @queue_name = "file_worker"
     end
 
+    # This method is called by the worker threads, so remember to keep it thread safe
+    def process(file_name)
+      @state[file_name] = {:time => Time.now, :status => :working}
+
+      begin
+        @worker_class.new(file_name, @options).process
+        FileUtils.mv(file_name, @done_path)
+      rescue Exception => e
+        handle_error(file_name, e)
+      end
+
+      @state.delete(file_name)
+    end
+
     def queue
       @queue ||= GirlFriday::WorkQueue.new(@queue_name, :size => 3) do |file_name|
-        @state[file_name] = {:time => Time.now, :status => :working}
-
-        begin
-          @worker_class.new(file_name, @options).process
-          FileUtils.mv(file_name, @done_path)
-        rescue Exception => e
-          handle_error(file_name, e)
-        end
-
-        @state.delete(file_name)
+        process(file_name)
       end
     end
 
