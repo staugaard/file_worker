@@ -8,12 +8,12 @@ Gem::Specification.new do |s|
   s.authors     = ["Mick Staugaard"]
   s.email       = ["mick@staugaard.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = "A multi-threaded worker that takes files as input"
+  s.description = "If you have files that you some how need to process, file_worker is your friend."
 
   s.files         = Dir['lib/**/*'] + %w(README.md)
   s.test_files    = Dir['test/**/*']
-  s.executables   = Dir['bin/**/*']
+  s.executables   = ['file_worker']
   s.require_paths = ["lib"]
 
   s.add_development_dependency "rake"
