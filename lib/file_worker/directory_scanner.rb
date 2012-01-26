@@ -20,6 +20,8 @@ module FileWorker
       @state = {}
       @state.extend JRuby::Synchronized
       @queue_name = "file_worker"
+
+      @error_handlers = []
     end
 
     # This method is called by the worker threads, so remember to keep it thread safe
@@ -85,11 +87,13 @@ module FileWorker
     end
 
     def on_error(&block)
-      @error_handler = block
+      @error_handlers << block
     end
 
     def handle_error(file_name, exception)
-      @error_handler.call(file_name, exception) if @error_handler
+      @error_handlers.each do |error_handler|
+        error_handler.call(file_name, exception)
+      end
     end
   end
 end
