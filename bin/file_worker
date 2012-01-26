@@ -10,8 +10,8 @@ scanner = FileWorker::Cli.build_scanner
 
 scanner.on_error do |file_name, exception|
   $stderr.puts("Failed to process #{file_name}")
-  $stderr.puts(ex)
-  $stderr.puts(ex.backtrace.join("\n"))
+  $stderr.puts(exception)
+  $stderr.puts(exception.backtrace.join("\n"))
 end
 
 scanner.start

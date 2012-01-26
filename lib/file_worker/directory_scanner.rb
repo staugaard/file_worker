@@ -12,6 +12,7 @@ module FileWorker
       @options   = options
       @in_path   = Pathname.new(@options[:in_directory])
       @done_path = Pathname.new(@options[:out_directory])
+      @glob_path = @in_path + '**/*'
       @sleep     = @options[:sleep] || 1
 
       @max_queue_size = @options[:max_queue_size] || 1000
@@ -31,7 +32,10 @@ module FileWorker
 
       begin
         @worker_class.new(file_name, @options).process
-        FileUtils.mv(file_name, @done_path)
+
+        done_file_name = file_name.sub(@in_path, @done_path)
+        FileUtils.mkdir_p(File.dirname(done_file_name))
+        FileUtils.mv(file_name, done_file_name)
       rescue Exception => e
         handle_error(file_name, e)
       end
@@ -66,7 +70,8 @@ module FileWorker
     end
 
     def scan
-      file_names = Dir.glob(@in_path + '*') - @state.keys
+      file_names = Dir.glob(@glob_path) - @state.keys
+      file_names.reject! { |file_name| File.directory?(file_name) }
 
       max_items = @max_queue_size - queue_size
 
