@@ -1,16 +1,6 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'jruby/synchronized'
 
-class TestWorker
-  def initialize(file_name, options)
-    @file_name = file_name
-  end
-
-  def process
-    puts "processing #{@file_name}"
-  end
-end
-
 class FailingTestWorker
   def initialize(file_name, options)
     @file_name = file_name
@@ -29,7 +19,6 @@ describe "the directory scanner" do
       :out_directory => @fixture_root + 'done',
       :max_queue_size => 10
     )
-    @file_worker.worker_class = TestWorker
 
     @errors = []
     @errors.extend JRuby::Synchronized
