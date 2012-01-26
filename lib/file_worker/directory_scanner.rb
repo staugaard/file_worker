@@ -5,6 +5,7 @@ require 'jruby/synchronized'
 module FileWorker
   class DirectoryScanner
     attr_accessor :worker_class
+    attr_reader :in_path, :done_path, :state
 
     def initialize(options)
       @options   = options
@@ -45,6 +46,12 @@ module FileWorker
 
     def wait_for_empty
       queue.wait_for_empty
+
+      sleep 0.5
+
+      while queue.status[@queue_name][:busy] != 0
+        sleep 0.5
+      end
     end
 
     def scan

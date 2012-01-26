@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "minitest"
   s.add_development_dependency "mocha"
-  s.add_development_dependency "fakefs"
 
   s.add_runtime_dependency "jruby-openssl"
   s.add_runtime_dependency "girl_friday"

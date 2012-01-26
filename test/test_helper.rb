@@ -8,19 +8,13 @@ require "minitest/autorun"
 require "mocha"
 require "pathname"
 require "fileutils"
-require "fakefs/safe"
 
 MiniTest::Spec.class_eval do
   before do
-    FakeFS.activate!
     @fixture_root = Pathname.new(File.dirname(__FILE__)) + "../tmp/fixtures"
     FileUtils.mkdir_p(@fixture_root + "in")
     FileUtils.mkdir_p(@fixture_root + "done")
     clean_fixture_dirs
-  end
-
-  after do
-    FakeFS.deactivate!
   end
 
   def clean_fixture_dirs
