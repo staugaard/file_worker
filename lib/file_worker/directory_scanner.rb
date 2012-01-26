@@ -15,7 +15,7 @@ module FileWorker
 
       @max_queue_size = @options[:max_queue_size] || 1000
 
-      @worker_class = Worker
+      @worker_class = DefaultWorker
 
       @state = {}
       @state.extend JRuby::Synchronized

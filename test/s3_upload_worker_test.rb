@@ -1,12 +1,12 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 
-describe "a worker" do
+describe "an s3 upload worker" do
   before do
     @file_name = "/path/to/file.name"
   end
 
   it "should fail when not provided auth options" do
-    assert_raises(IndexError) { FileWorker::Worker.new(@file_name, {}) }
+    assert_raises(IndexError) { FileWorker::S3UploadWorker.new(@file_name, {}) }
   end
 
   describe "instantiated correctly" do
@@ -16,7 +16,7 @@ describe "a worker" do
         :aws_secret_access_key => "other key"
       }
 
-      @worker = FileWorker::Worker.new(@file_name, @options.merge(:aws_s3_bucket => "files"))
+      @worker = FileWorker::S3UploadWorker.new(@file_name, @options.merge(:aws_s3_bucket => "files"))
     end
 
     describe "process" do

@@ -1,7 +1,7 @@
 require "fog"
 
 module FileWorker
-  class Worker
+  class S3UploadWorker
     def initialize(file_name, options)
       @file_name   = file_name
       @bucket_name = options.fetch(:aws_s3_bucket)
