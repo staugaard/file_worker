@@ -1,10 +1,6 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env jruby
 
-require "rubygems"
-require "bundler"
-Bundler.require
-
-require 'file_worker/cli'
+require 'file_worker'
 
 scanner = FileWorker::Cli.build_scanner
 
