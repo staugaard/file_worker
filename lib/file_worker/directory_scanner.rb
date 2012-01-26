@@ -9,8 +9,8 @@ module FileWorker
 
     def initialize(options)
       @options   = options
-      @in_path   = @options[:root] + 'in'
-      @done_path = @options[:root] + 'done'
+      @in_path   = @options[:in_directory]
+      @done_path = @options[:out_directory]
       @sleep     = @options[:sleep] || 1
 
       @max_queue_size = @options[:max_queue_size] || 1000

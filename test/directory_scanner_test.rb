@@ -25,7 +25,8 @@ describe "the directory scanner" do
   before do
     prepare_fixture_files
     @file_worker = FileWorker::DirectoryScanner.new(
-      :root => @fixture_root,
+      :in_directory => @fixture_root + 'in',
+      :out_directory => @fixture_root + 'done',
       :max_queue_size => 10
     )
     @file_worker.worker_class = TestWorker
