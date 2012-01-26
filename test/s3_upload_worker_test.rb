@@ -11,12 +11,11 @@ describe "an s3 upload worker" do
 
   describe "instantiated correctly" do
     before do
-      @options = {
-        :aws_access_key_id     => "some key",
-        :aws_secret_access_key => "other key"
-      }
+      ENV["S3_BUCKET"]             = "files"
+      ENV["AWS_ACCESS_KEY_ID"]     = "some key"
+      ENV["AWS_SECRET_ACCESS_KEY"] = "other key"
 
-      @worker = FileWorker::S3UploadWorker.new(@file_name, @options.merge(:aws_s3_bucket => "files"))
+      @worker = FileWorker::S3UploadWorker.new(@file_name, {})
     end
 
     describe "process" do
