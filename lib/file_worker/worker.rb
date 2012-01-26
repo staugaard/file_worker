@@ -3,10 +3,10 @@ require "fog"
 module FileWorker
   class Worker
     def initialize(file_name, options)
-      @file_name  = file_name
-      @bucket     = options.fetch(:aws_s3_bucket)
-      @aws_key_id = options.fetch(:aws_access_key_id)
-      @aws_secret = options.fetch(:aws_secret_access_key)
+      @file_name   = file_name
+      @bucket_name = options.fetch(:aws_s3_bucket)
+      @aws_key_id  = options.fetch(:aws_access_key_id)
+      @aws_secret  = options.fetch(:aws_secret_access_key)
     end
 
     def process
@@ -28,7 +28,7 @@ module FileWorker
     end
 
     def bucket
-      connection.directories.get(@bucket)
+      connection.directories.get(@bucket_name)
     end
   end
 end
