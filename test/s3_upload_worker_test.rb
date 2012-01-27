@@ -23,11 +23,10 @@ describe "an s3 upload worker" do
         file   = stub()
         File.expects(:open).with(@file_name).returns(file)
 
-        files  = stub()
-        bucket = stub(:files => files)
-        files.expects(:create).with(:key => File.basename(@file_name), :body => file, :public => false)
+        s3 = stub('s3')
+        s3.expects(:put).with('files', File.basename(@file_name), file)
 
-        @worker.expects(:bucket).returns(bucket)
+        @worker.expects(:s3).returns(s3)
         @worker.process
       end
     end

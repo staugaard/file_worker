@@ -1,34 +1,20 @@
-require "fog"
+require "right_aws"
 
 module FileWorker
   class S3UploadWorker
     def initialize(file_name, options)
       @file_name   = file_name
       @bucket_name = ENV.fetch("S3_BUCKET")
-      @aws_key_id  = ENV.fetch("AWS_ACCESS_KEY_ID")
-      @aws_secret  = ENV.fetch("AWS_SECRET_ACCESS_KEY")
     end
 
     def process
-      bucket.files.create(
-        :key    => File.basename(@file_name),
-        :body   => File.open(@file_name),
-        :public => false
-      )
+      s3.put(@bucket_name, File.basename(@file_name), File.open(@file_name))
     end
 
     private
 
-    def connection
-      @connection ||= Fog::Storage.new(
-        :provider              => "AWS",
-        :aws_access_key_id     => @aws_key_id,
-        :aws_secret_access_key => @aws_secret
-      )
-    end
-
-    def bucket
-      connection.directories.get(@bucket_name)
+    def s3
+      @s3 ||= RightAws::S3Interface.new
     end
   end
 end

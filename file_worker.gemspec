@@ -22,5 +22,5 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "jruby-openssl"
   s.add_runtime_dependency "girl_friday"
-  s.add_runtime_dependency "fog"
+  s.add_runtime_dependency "right_aws", "~> 3.0"
 end

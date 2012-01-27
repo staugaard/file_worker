@@ -3,6 +3,7 @@
 require 'file_worker'
 
 scanner = FileWorker::Cli.build_scanner
+scanner.worker_class = FileWorker::S3UploadWorker
 
 scanner.on_error do |file_name, exception|
   $stderr.puts("Failed to process #{file_name}")
