@@ -1,6 +1,5 @@
 require 'girl_friday'
 require 'fileutils'
-require 'jruby/synchronized'
 require 'pathname'
 
 module FileWorker
@@ -20,8 +19,9 @@ module FileWorker
 
       @worker_class = DefaultWorker
 
-      @state = {}
-      @state.extend JRuby::Synchronized
+      @state = []
+      @state_lock = Mutex.new
+
       @queue_name = "file_worker"
 
       @error_handlers = []
@@ -29,19 +29,19 @@ module FileWorker
 
     # This method is called by the worker threads, so remember to keep it thread safe
     def process(file_name)
-      @state[file_name] = {:time => Time.now, :status => :working}
-
       begin
         @worker_class.new(file_name, @options).process
 
         done_file_name = file_name.sub(@in_path, @done_path)
         FileUtils.mkdir_p(File.dirname(done_file_name))
-        FileUtils.mv(file_name, done_file_name)
+        FileUtils.mv(file_name, done_file_name, :secure => true)
       rescue Exception => e
         handle_error(file_name, e)
       end
 
-      @state.delete(file_name)
+      @state_lock.synchronize do
+        @state.delete(file_name)
+      end
     end
 
     def queue
@@ -55,7 +55,9 @@ module FileWorker
     end
 
     def enqueue(file_name)
-      @state[file_name] = {:time => Time.now, :status => :enqueued}
+      @state_lock.synchronize do
+        @state << file_name
+      end
 
       queue.push(file_name)
     end
@@ -71,13 +73,20 @@ module FileWorker
     end
 
     def scan
-      file_names = Dir.glob(@glob_path) - @state.keys
+      file_names = nil
+
+      @state_lock.synchronize do
+        file_names = Dir.glob(@glob_path) - @state
+      end
+
       file_names.reject! { |file_name| File.directory?(file_name) }
 
       max_items = @max_queue_size - queue_size
 
-      file_names[0,max_items].each do |file_name|
-        enqueue(file_name)
+      if max_items > 0
+        file_names[0,max_items].each do |file_name|
+          enqueue(file_name)
+        end
       end
     end
 

@@ -92,7 +92,7 @@ describe "the directory scanner" do
   describe "when a file is already enqueued" do
     before do
       file_name = Dir.glob(@file_worker.in_path + '*').first
-      @file_worker.state[file_name] = {:time => Time.now, :status => :working}
+      @file_worker.state << file_name
     end
 
     it "should not enqueue the file again" do
