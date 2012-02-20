@@ -1,5 +1,4 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
-require 'jruby/synchronized'
 
 class FailingTestWorker
   def initialize(file_name, options)
@@ -21,10 +20,10 @@ describe "the directory scanner" do
     )
 
     @errors = []
-    @errors.extend JRuby::Synchronized
+    @errors_lock = Mutex.new
 
     @file_worker.on_error do |file_name, exception|
-      @errors << file_name
+      @errors_lock.synchronize { @errors << file_name }
     end
   end
 
@@ -110,7 +109,9 @@ describe "the directory scanner" do
     end
 
     it "should call the error handler" do
-      @errors.size.must_equal(5)
+      @errors_lock.synchronize do
+        @errors.size.must_equal(5)
+      end
     end
 
     it "should not move the files" do
